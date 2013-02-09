@@ -1,0 +1,81 @@
+Oxygen Python Management SDK
+
+Thank you for downloading the SDK! This file shows sample code to perform 
+common tasks using the Oxygen Python Admin SDK. 
+
+This SDK is compiled for a specific version of Python. Please make sure 
+you use the correct version to prevent certain errors. 
+
+The following sample code is meant to be used interactively in the 
+python console. Documentation is provided in ./html/index.html
+
+#!/usr/bin/env python
+
+import o2managementlib 
+from o2exceptions import *
+import sys
+
+# Please request an admin api key from support.oxygencloud.com
+api_key = 'YOUR API KEY'
+
+# Create an O2Agent using the O2AgentFactory
+o2factory = o2managementlib.O2AgentFactory()
+o2 = o2factory.create_O2Agent(api_key)
+
+'''
+# Only if you are behind a proxy:
+proxy_uri = '' # 10.10.10.50:3128
+proxy_username = '' # blank if you don't have authentication
+proxy_password = '' # blank if you don't have authentication
+o2 = o2factory.create_O2Agent(api_key, proxy_uri, proxy_username, proxy_password)
+'''
+
+# Your credentials
+oxygenId = 'YOUR OXYGEN ID'
+password = 'YOUR PASSWORD'
+
+# Login. You must be a user with admin privileges. 
+# This example also shows how to handle O2Exception errors. 
+# All O2Agent methods throw O2Exception, so use try/except on each call
+# For all 02Exception reason codes, please see documentation
+try:
+    o2.login_api_user(oxygenId, password)
+except O2Exception as e:
+    print e.message
+    if e.reason_code == 4:
+        print 'An error occurred. Invalid API Key.' # for all O2Exception reason codes, see documentation
+        sys.exit(1)
+    elif e.reason_code == 26:
+        print 'An error occurred. Invalid credentials."# for all O2Exception reason codes, see documentation 
+        sys.exit(1)
+    else:
+        print 'Something else happened. Reason Code: ' + str(e.reason_code)
+    sys.exit(1)
+
+# whoami
+me = o2.get_user_info()
+
+# User's information is represented as an O2UserInfo object.
+# You can retrieve user information by calling O2UserInfo methods
+# as specified in the documentation.
+print me
+print me.get_oxygen_id()
+print me.get_display_name()
+
+# Create a new user
+# CORPOATE ID should be a blank string if your account does NOT use AD/LDAP
+# PASSWORD should be a blank string if your account uses AD/LDAP
+o2.create_user('NEW USER OXYGEN ID', 'NEW USER EMAIL', 'NEW USER OPTIONAL CORPORATE ID', 'NEW USER FIRST NAME', 'NEW USER LAST NAME', 'NEW USER OPTIONAL PASSWORD')
+
+# Get all users in your company. returns [O2UserInfo]
+o2.get_all_users()
+
+# Disable a user by their Oxygen ID
+o2.disable_user('OXYGEN ID')
+
+# Enable a user by their Oxygen ID
+o2.enable_user('OXYGEN ID')
+
+# Delete a user by their Oxygen ID
+o2.delete_user('OXYGEN ID')
+
